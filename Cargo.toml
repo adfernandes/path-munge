@@ -1,0 +1,14 @@
+[package]
+name = "path-munge"
+version = "1.0.0"
+edition = "2024"
+authors = ["Andrew Fernandes <andrew@fernandes.org>"]
+description = "A command-line utility to help set PATH-type shell variables."
+repository = "https://github.com/adfernandes/path-munge"
+categories = ["command-line-utilities", "config"]
+license-file = "LICENSE.md"
+readme = "README.md"
+
+[dependencies]
+anyhow = { version = "1.0.99" }
+clap = { version = "4.5.47", features = ["derive"] }

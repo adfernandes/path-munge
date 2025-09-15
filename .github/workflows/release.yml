@@ -1,0 +1,109 @@
+name: Build and Release Binaries
+
+on:
+  push:
+    tags:
+      - '*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            artifact_suffix: linux
+            archive_ext: tar.gz
+            bin_ext: ''
+          - os: macos-latest
+            artifact_suffix: macos
+            archive_ext: tar.gz
+            bin_ext: ''
+          - os: windows-latest
+            artifact_suffix: windows
+            archive_ext: zip
+            bin_ext: .exe
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust (stable)
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+
+      - name: Build release
+        run: cargo build --release --locked
+
+      - name: Prepare artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          BIN_NAME=path-munge
+          TAG=${GITHUB_REF_NAME}
+          OUTDIR=dist
+          mkdir -p "$OUTDIR"
+
+          # Resolve built binary path
+          BIN_PATH="target/release/${BIN_NAME}${{ matrix.bin_ext }}"
+
+          # Copy to a clean, versioned name
+          ARTIFACT_BASENAME="${BIN_NAME}-${TAG}-${{ matrix.artifact_suffix }}"
+          STAGE_DIR="${OUTDIR}/${ARTIFACT_BASENAME}"
+          mkdir -p "$STAGE_DIR"
+
+          cp "$BIN_PATH" "$STAGE_DIR/"
+          # Include license and readme for convenience
+          cp LICENSE.md "$STAGE_DIR/" || true
+          cp README.md "$STAGE_DIR/" || true
+
+          # Archive per OS
+          if [ "${{ matrix.archive_ext }}" = "zip" ]; then
+            # Use powershell Compress-Archive on Windows; fallback to zip if available
+            if command -v powershell.exe >/dev/null 2>&1; then
+              powershell.exe -NoProfile -Command "Compress-Archive -Path '${STAGE_DIR}/*' -DestinationPath '${OUTDIR}/${ARTIFACT_BASENAME}.zip'"
+            else
+              (cd "$OUTDIR" && zip -r "${ARTIFACT_BASENAME}.zip" "${ARTIFACT_BASENAME}")
+            fi
+          else
+            (cd "$OUTDIR" && tar -czf "${ARTIFACT_BASENAME}.tar.gz" "${ARTIFACT_BASENAME}")
+          fi
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: path-munge-${{ github.ref_name }}-${{ matrix.artifact_suffix }}
+          path: |
+            dist/*.${{ matrix.archive_ext }}
+          if-no-files-found: error
+
+  release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+
+      - name: Display downloaded files (debug)
+        run: |
+          ls -R dist || true
+
+      - name: Create Release and Upload Assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/**/**/*.tar.gz
+            dist/**/**/*.zip
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
