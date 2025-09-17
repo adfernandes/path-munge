@@ -1,5 +1,10 @@
 # path-munge
 
+[![Crates.io](https://img.shields.io/crates/v/path-munge)](https://crates.io/crates/path-munge)
+[![Crates.io](https://img.shields.io/crates/d/path-munge)](https://crates.io/crates/path-munge)
+[![License: MPL 2.0](https://img.shields.io/badge/License-MPL_2.0-brightgreen.svg)](https://opensource.org/licenses/MPL-2.0)
+![Release Workflow](https://img.shields.io/github/actions/workflow/status/adfernandes/path-munge/release.yml)
+
 This utility is designed to help with managing `PATH`-type shell variables.
 
 For example, given
