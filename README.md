@@ -46,3 +46,14 @@ Install with `cargo`:
 cargo install path-munge
 ```
 or download a binary from the [releases page](https://github.com/adfernandes/path-munge/releases).
+
+## `MANPATH` Warning
+
+Note that `MANPATH` is a bit special. `path-munge` removes prefix, postfix, and double colons.
+
+**However**, the [`man`](https://www.man7.org/linux/man-pages/man5/manpath.5.html) manual page, under "SEARCH PATH" has an interesting note:
+
+> _If the value of `$MANPATH` starts with a colon, then the default search path is added at its start. If the value of `$MANPATH` ends with a colon, then the default search path is added at its end. If the value of `$MANPATH` contains a double colon (`::`), then the default search path is inserted in the middle of the value, between the two colons._
+
+What this means is that unless you add back a leading or trailing colon when setting `MANPATH`, you will be **unable** to search the default system `MANPATH`!
+
