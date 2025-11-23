@@ -43,7 +43,7 @@ jobs:
             artifact_suffix: windows
             archive_ext: zip
             bin_ext: .exe
-          - os: windows-latest
+          - os: windows-11-arm
             target: aarch64-pc-windows-msvc
             arch: aarch64
             artifact_suffix: windows
@@ -86,9 +86,9 @@ jobs:
           STAGE_DIR="${OUTDIR}/${ARTIFACT_BASENAME}"
           mkdir -p "$STAGE_DIR"
 
+          cp README.md "$STAGE_DIR/"
+          cp LICENSE.md "$STAGE_DIR/"
           cp "$BIN_PATH" "$STAGE_DIR/"
-          cp LICENSE.md "$STAGE_DIR/" || true
-          cp README.md "$STAGE_DIR/" || true
 
           if [ "${{ matrix.archive_ext }}" = "zip" ]; then
             if command -v powershell.exe >/dev/null 2>&1; then
@@ -101,7 +101,7 @@ jobs:
           fi
 
       - name: Upload artifact
-        if: startsWith(github.ref, 'refs/tags/')
+        if: github.ref_type == 'tag'
         uses: actions/upload-artifact@v4
         with:
           name: path-munge-${{ github.ref_name }}-${{ matrix.artifact_suffix }}-${{ matrix.arch }}
@@ -111,7 +111,7 @@ jobs:
 
   release:
     name: Create GitHub Release
-    if: startsWith(github.ref, 'refs/tags/')
+    if: github.ref_type == 'tag'
     runs-on: ubuntu-latest
     permissions:
         contents: write
