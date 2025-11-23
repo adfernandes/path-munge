@@ -23,14 +23,14 @@ jobs:
             artifact_suffix: linux
             archive_ext: tar.gz
             bin_ext: ''
-          # Linux arm64
-          - os: ubuntu-latest
+          # Linux arm64 (no 'latest' tag yet)
+          - os: ubuntu-24.04-arm
             target: aarch64-unknown-linux-gnu
             arch: arm64
             artifact_suffix: linux
             archive_ext: tar.gz
             bin_ext: ''
-          # macOS (arm64)
+          # macOS (arm64 only)
           - os: macos-latest
             target: aarch64-apple-darwin
             arch: arm64
@@ -54,16 +54,12 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Install Rust (stable)
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.target }}
-
-      - name: Install Linux arm64 cross-linker
-        if: ${{ matrix.os == 'ubuntu-latest' && matrix.arch == 'arm64' }}
-        run: sudo apt-get update && sudo apt-get install -y gcc-aarch64-linux-gnu
 
       - name: Cache cargo
         uses: Swatinem/rust-cache@v2
@@ -74,28 +70,25 @@ jobs:
       - name: Prepare artifact
         shell: bash
         run: |
-          set -euo pipefail
+          set -euxo pipefail
+
           BIN_NAME=path-munge
           TAG=${GITHUB_REF_NAME}
+
           OUTDIR=dist
           mkdir -p "$OUTDIR"
 
-          # Resolve built binary path
           BIN_PATH="target/${{ matrix.target }}/release/${BIN_NAME}${{ matrix.bin_ext }}"
 
-          # Copy to a clean, versioned name
           ARTIFACT_BASENAME="${BIN_NAME}-${TAG}-${{ matrix.artifact_suffix }}-${{ matrix.arch }}"
           STAGE_DIR="${OUTDIR}/${ARTIFACT_BASENAME}"
           mkdir -p "$STAGE_DIR"
 
           cp "$BIN_PATH" "$STAGE_DIR/"
-          # Include license and readme for convenience
           cp LICENSE.md "$STAGE_DIR/" || true
           cp README.md "$STAGE_DIR/" || true
 
-          # Archive per OS
           if [ "${{ matrix.archive_ext }}" = "zip" ]; then
-            # Use powershell Compress-Archive on Windows; fallback to zip if available
             if command -v powershell.exe >/dev/null 2>&1; then
               powershell.exe -NoProfile -Command "Compress-Archive -Path '${STAGE_DIR}/*' -DestinationPath '${OUTDIR}/${ARTIFACT_BASENAME}.zip'"
             else
@@ -119,13 +112,13 @@ jobs:
     needs: build
     steps:
       - name: Download all artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           path: dist
 
       - name: Display downloaded files (debug)
         run: |
-          ls -R dist || true
+          ls -lR dist || true
 
       - name: Create Release and Upload Assets
         uses: softprops/action-gh-release@v2
