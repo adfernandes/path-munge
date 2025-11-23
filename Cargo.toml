@@ -6,7 +6,7 @@ authors = ["Andrew Fernandes <andrew@fernandes.org>"]
 description = "A command-line utility to help set PATH-type shell variables."
 repository = "https://github.com/adfernandes/path-munge"
 categories = ["command-line-utilities", "config"]
-license-file = "LICENSE.md"
+license = "MPL-2.0"
 readme = "README.md"
 
 [dependencies]
