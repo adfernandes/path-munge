@@ -1,6 +1,6 @@
 [package]
 name = "path-munge"
-version = "1.0.6"
+version = "1.0.7"
 edition = "2024"
 authors = ["Andrew Fernandes <andrew@fernandes.org>"]
 description = "A command-line utility to help set PATH-type shell variables."
