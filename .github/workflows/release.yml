@@ -19,38 +19,33 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # Linux x86_64
           - os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
             arch: x86_64
             artifact_suffix: linux
             archive_ext: tar.gz
             bin_ext: ''
-          # Linux arm64 (no 'latest' tag yet)
           - os: ubuntu-24.04-arm
             target: aarch64-unknown-linux-gnu
-            arch: arm64
+            arch: aarch64
             artifact_suffix: linux
             archive_ext: tar.gz
             bin_ext: ''
-          # macOS (arm64 only)
           - os: macos-latest
             target: aarch64-apple-darwin
-            arch: arm64
+            arch: aarch64
             artifact_suffix: macos
             archive_ext: tar.gz
             bin_ext: ''
-          # Windows x86_64
           - os: windows-latest
             target: x86_64-pc-windows-msvc
             arch: x86_64
             artifact_suffix: windows
             archive_ext: zip
             bin_ext: .exe
-          # Windows arm64
           - os: windows-latest
             target: aarch64-pc-windows-msvc
-            arch: arm64
+            arch: aarch64
             artifact_suffix: windows
             archive_ext: zip
             bin_ext: .exe
@@ -69,7 +64,6 @@ jobs:
         if: github.ref_type != 'tag'
         uses: Swatinem/rust-cache@v2
         with:
-          # Tie cache to the exact toolchain selected by dtolnay/rust-toolchain
           shared-key: ${{ steps.toolchain.outputs.cachekey }}-${{ matrix.target }}
 
       - name: Build release
