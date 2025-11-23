@@ -60,9 +60,17 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Install Rust (stable)
+        id: toolchain
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.target }}
+
+      - name: Rust cache (non-tag builds)
+        if: github.ref_type != 'tag'
+        uses: Swatinem/rust-cache@v2
+        with:
+          # Tie cache to the exact toolchain selected by dtolnay/rust-toolchain
+          shared-key: ${{ steps.toolchain.outputs.cachekey }}-${{ matrix.target }}
 
       - name: Build release
         run: cargo build --release --locked --target ${{ matrix.target }}
