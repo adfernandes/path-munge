@@ -120,10 +120,10 @@ jobs:
         run: |
           ls -lR dist
 
-      - name: Create Release and Upload Assets
-        run:  gh release create ${{ github.ref_name }} \
-              --generate-notes \
-                dist/**/*.tar.gz \
-                dist/**/*.zip
+      - name: Create, upload, and finalize
+        run: |
+          gh release create ${{ github.ref_name }} --draft --notes-from-tag
+          gh release upload ${{ github.ref_name }} dist/**/*.tar.gz dist/**/*.zip
+          gh release edit   ${{ github.ref_name }} --draft=false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
