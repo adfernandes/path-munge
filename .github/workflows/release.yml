@@ -124,7 +124,7 @@ jobs:
 
       - name: Cut the actual release
         run: gh release create ${{ github.ref_name }} \
-              target/dist/*.tar.gz target/dist/*.zip \
+              target/dist/*/*.tar.gz target/dist/*/*.zip \
               --notes-from-tag
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
