@@ -78,26 +78,26 @@ jobs:
           TAG=${GITHUB_REF_NAME}
 
           OUTDIR="target/dist"
-          mkdir -p "$OUTDIR"
+          mkdir -p "${OUTDIR}"
 
           BIN_PATH="target/${{ matrix.target }}/release/${BIN_NAME}${{ matrix.bin_ext }}"
 
           ARTIFACT_BASENAME="${BIN_NAME}-${TAG}-${{ matrix.artifact_suffix }}-${{ matrix.arch }}"
           STAGE_DIR="${OUTDIR}/${ARTIFACT_BASENAME}"
-          mkdir -p "$STAGE_DIR"
+          mkdir -p "${STAGE_DIR}"
 
-          cp README.md "$STAGE_DIR/"
-          cp LICENSE.md "$STAGE_DIR/"
-          cp "$BIN_PATH" "$STAGE_DIR/"
+          cp "README.md" "${STAGE_DIR}/"
+          cp "LICENSE.md" "${STAGE_DIR}/"
+          cp "${BIN_PATH}" "${STAGE_DIR}/"
 
           if [ "${{ matrix.archive_ext }}" = "zip" ]; then
             if command -v powershell.exe >/dev/null 2>&1; then
               powershell.exe -NoProfile -Command "Compress-Archive -Path '${STAGE_DIR}/*' -DestinationPath '${OUTDIR}/${ARTIFACT_BASENAME}.zip'"
             else
-              (cd "$OUTDIR" && zip -r "${ARTIFACT_BASENAME}.zip" "${ARTIFACT_BASENAME}")
+              (cd "${OUTDIR}" && zip -r "${ARTIFACT_BASENAME}.zip" "${ARTIFACT_BASENAME}")
             fi
           else
-            (cd "$OUTDIR" && tar -czf "${ARTIFACT_BASENAME}.tar.gz" "${ARTIFACT_BASENAME}")
+            (cd "${OUTDIR}" && tar -czf "${ARTIFACT_BASENAME}.tar.gz" "${ARTIFACT_BASENAME}")
           fi
 
       - name: Upload artifact
